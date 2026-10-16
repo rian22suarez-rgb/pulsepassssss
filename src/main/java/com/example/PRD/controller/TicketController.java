@@ -1,4 +1,4 @@
 package com.example.PRD.controller;
 
-public class icketController {
+public class TicketController {
 }

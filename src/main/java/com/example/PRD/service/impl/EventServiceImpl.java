@@ -44,7 +44,7 @@ public class EventServiceImpl implements EventService {
         }
         Venue venue = venueRepository.findByCode(request.venueCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Venue not found: " + request.venueCode()));
-        if (!venue.isActive()) {
+        if (!venue.getActive()) {
             throw new BusinessRuleException("Venue is not active: " + request.venueCode());
         }
         if (request.eventDate() == null || !request.eventDate().isAfter(LocalDateTime.now())) {
@@ -96,7 +96,7 @@ public class EventServiceImpl implements EventService {
         if (event.getEventDate() == null || !event.getEventDate().isAfter(LocalDateTime.now())) {
             throw new BusinessRuleException("Event date must be in the future");
         }
-        if (!event.getVenue().isActive()) {
+        if (!event.getVenue().getActive()) {
             throw new BusinessRuleException("Venue is not active");
         }
         event.setStatus(EventStatus.PUBLISHED);

@@ -16,6 +16,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Optional<Event> findByEventCode(String eventCode);
 
+    // Método agregado para verificar existencia por código de evento
+    boolean existsByEventCode(String eventCode);
+
     List<Event> findByStatusOrderByEventDateAsc(EventStatus status);
 
     // FR-VEN-004 / sección 14: eventos de un venue por venue.code
@@ -27,20 +30,20 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     // FR-SRC-002: eventos de una ciudad donde participa un artista
     @Query("SELECT DISTINCT e FROM Event e " +
-    "JOIN e.venue v JOIN e.artists a " +
-    "WHERE v.city = :city AND a.stageName = :stageName")
+            "JOIN e.venue v JOIN e.artists a " +
+            "WHERE v.city = :city AND a.stageName = :stageName")
     List<Event> findByCityAndArtist(@Param("city") String city,
                                     @Param("stageName") String stageName);
 
     // FR-SRC-003: eventos recomendados
     @Query("SELECT DISTINCT e FROM Event e " +
-    "JOIN e.venue v JOIN e.artists a " +
-    "WHERE e.status = com.example.PRD.model.EventStatus.PUBLISHED " +
-    "AND e.eventDate > :date " +
-    "AND v.city = :city " +
-    "AND LOWER(a.stageName) LIKE LOWER(CONCAT('%', :artistText, '%')) " +
-    "ORDER BY e.eventDate ASC")
+            "JOIN e.venue v JOIN e.artists a " +
+            "WHERE e.status = com.example.PRD.model.EventStatus.PUBLISHED " +
+            "AND e.eventDate > :date " +
+            "AND v.city = :city " +
+            "AND LOWER(a.stageName) LIKE LOWER(CONCAT('%', :artistText, '%')) " +
+            "ORDER BY e.eventDate ASC")
     List<Event> findRecommendedEvents(@Param("date") LocalDateTime date,
-    @Param("city") String city,
-    @Param("artistText") String artistText);
+                                      @Param("city") String city,
+                                      @Param("artistText") String artistText);
 }

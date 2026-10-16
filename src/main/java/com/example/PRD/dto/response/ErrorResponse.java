@@ -1,4 +1,4 @@
-package com.example.PRD.exception;
+package com.example.PRD.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.Map;

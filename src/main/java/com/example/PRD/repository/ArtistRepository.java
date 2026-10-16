@@ -13,11 +13,16 @@ import java.util.Optional;
 @Repository
 public interface ArtistRepository extends JpaRepository<Artist, Long> {
 
-    // Query Method para buscar artista por nombre artístico único
+    // Buscar artista por nombre artístico exacto
     Optional<Artist> findByStageName(String stageName);
 
+    // Método que utiliza ArtistServiceImpl (ignorando mayúsculas/minúsculas)
+    Optional<Artist> findByStageNameIgnoreCase(String stageName);
+
+    // Método que utiliza ArtistServiceImpl para listar artistas activos ordenados
+    List<Artist> findByActiveTrueOrderByStageNameAsc();
+
     // FR-ART-004: eventos donde participa un artista (JPQL con JOIN)
-    // FR-ART-004: eventos donde participa un artista (JPQL con JOIN)
-@Query("SELECT DISTINCT e FROM Event e JOIN e.artists a WHERE a.stageName = :stageName")
-List<Event> findEventsByArtistStageName(@Param("stageName") String stageName);
+    @Query("SELECT DISTINCT e FROM Event e JOIN e.artists a WHERE a.stageName = :stageName")
+    List<Event> findEventsByArtistStageName(@Param("stageName") String stageName);
 }
