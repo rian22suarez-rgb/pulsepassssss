@@ -34,10 +34,14 @@ class UserServiceTest {
 
     private RegisterUserRequest validRequest() {
         return new RegisterUserRequest(
-                "andrea", "andrea@email.com",
-                "Andrea", "Gómez",
-                "3001234567", "Santa Marta",
-                LocalDate.of(2000, 1, 1)
+                "andrea",                     // username
+                "andrea@email.com",           // email
+                "UnaFraseSegura12!",          // password (mínimo 12 caracteres)
+                "Andrea",                     // firstName
+                "Gómez",                      // lastName
+                "3001234567",                 // phone
+                "Santa Marta",                // city
+                LocalDate.of(2000, 1, 1)      // birthDate
         );
     }
 
@@ -81,9 +85,16 @@ class UserServiceTest {
     @Test // TEST-USER-004
     void register_futureBirthDate_throws() {
         RegisterUserRequest req = new RegisterUserRequest(
-                "x", "x@email.com", "X", "Y", null, null,
-                LocalDate.now().plusDays(1)
+                "x",                                  // username
+                "x@email.com",                        // email
+                "UnaFraseSegura12!",                  // password (12+ caracteres)
+                "Y",                                  // firstName
+                null,                                 // lastName
+                null,                                 // phone
+                null,                                 // city
+                LocalDate.now().plusDays(1)           // birthDate (futura)
         );
+
         when(userRepository.existsByUsername("x")).thenReturn(false);
         when(userRepository.existsByEmailIgnoreCase("x@email.com")).thenReturn(false);
 
