@@ -30,6 +30,10 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public long getAccessTokenTtlMillis() {
+        return accessTokenTtl;
+    }
+
     public String generateToken(UserDetails userDetails) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + accessTokenTtl);

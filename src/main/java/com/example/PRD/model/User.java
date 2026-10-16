@@ -2,7 +2,9 @@ package com.example.PRD.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -27,15 +29,13 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private UserProfile profile;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role", nullable = false, length = 50)
+    private Set<String> roles = new HashSet<>();
+
     public User() {}
 
-    public User(String username, String email, Boolean active) {
-        this.username = username;
-        this.email = email;
-        this.active = active;
-    }
-
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -52,23 +52,20 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public UserProfile getProfile() { return profile; }
-    public void setProfile(UserProfile profile) { 
-        this.profile = profile; 
-        if (profile != null) {
-            profile.setUser(this);
-        }
-    }
+    public void setProfile(UserProfile profile) { this.profile = profile; }
+
+    public Set<String> getRoles() { return roles; }
+    public void setRoles(Set<String> roles) { this.roles = roles; }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(username, user.username) && Objects.equals(email, user.email);
+        if (!(o instanceof User other)) return false;
+        return id != null && Objects.equals(id, other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, email);
+        return getClass().hashCode();
     }
 }

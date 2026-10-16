@@ -17,8 +17,12 @@ public record RegisterUserRequest(
         @Size(min = 12, message = "La contraseña debe tener al menos 12 caracteres")
         String password,
 
+        @NotBlank(message = "El nombre es obligatorio")
         String firstName,
+
+        @NotBlank(message = "El apellido es obligatorio")
         String lastName,
+
         String phone,
         String city,
         LocalDate birthDate

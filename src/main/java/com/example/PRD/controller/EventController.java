@@ -7,6 +7,7 @@ import com.example.PRD.service.EventService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class EventController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventResponse> create(@Valid @RequestBody CreateEventRequest request) {
         EventResponse createdEvent = eventService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdEvent);
@@ -38,11 +40,13 @@ public class EventController {
     }
 
     @PatchMapping("/{eventCode}/publish")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventResponse> publish(@PathVariable String eventCode) {
         return ResponseEntity.ok(eventService.publish(eventCode));
     }
 
     @PostMapping("/{eventCode}/artists/{artistId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventResponse> addArtist(
             @PathVariable String eventCode,
             @PathVariable Long artistId) {
