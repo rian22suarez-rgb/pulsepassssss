@@ -5,13 +5,13 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
-
+import org.springframework.security.authentication.AuthenticationManager;
 @TestConfiguration(proxyBeanMethods = false)
 public class TestcontainersConfiguration {
 
     @Bean
     @ServiceConnection
     PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"));
+        return new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"));
     }
 }

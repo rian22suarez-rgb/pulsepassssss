@@ -4,9 +4,8 @@ import com.example.PRD.dto.request.LoginRequest;
 import com.example.PRD.dto.request.RegisterUserRequest;
 import com.example.PRD.dto.response.AuthResponse;
 import com.example.PRD.dto.response.AuthenticatedUserResponse;
-import com.example.PRD.model.User;
-import com.example.PRD.repository.UserRepository;
 import com.example.PRD.security.JwtService;
+import com.example.PRD.security.SecurityPrincipal;
 import com.example.PRD.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -28,16 +27,13 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     public AuthController(AuthenticationManager authenticationManager,
                           UserService userService,
-                          JwtService jwtService,
-                          UserRepository userRepository) {
+                          JwtService jwtService) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.jwtService = jwtService;
-        this.userRepository = userRepository;
     }
 
     @PostMapping("/register")
@@ -52,10 +48,8 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.identifier(), request.password())
             );
-
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtService.generateToken(userDetails);
-
             return ResponseEntity.ok(new AuthResponse(
                     token,
                     "Bearer",
@@ -69,21 +63,15 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<AuthenticatedUserResponse> me() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+        if (authentication == null
+                || !(authentication.getPrincipal() instanceof SecurityPrincipal principal)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         return ResponseEntity.ok(new AuthenticatedUserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                List.copyOf(user.getRoles())
+                principal.getId(),
+                principal.getUsername(),
+                principal.getEmail(),
+                List.copyOf(principal.getRoles())
         ));
     }
 }
