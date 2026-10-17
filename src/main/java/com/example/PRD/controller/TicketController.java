@@ -24,8 +24,6 @@ public class TicketController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TicketResponse> purchase(@Valid @RequestBody PurchaseTicketRequest request) {
-        // Ownership: el Service debe validar que request.userEmail coincida con el principal
-        // (si el rol es USER). Un ADMIN puede comprar para cualquiera.
         TicketResponse purchasedTicket = ticketService.purchase(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(purchasedTicket);
     }
@@ -33,8 +31,50 @@ public class TicketController {
     @GetMapping("/user/{email}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<TicketResponse>> findByUserEmail(@PathVariable String email) {
-        // Ownership: el Service debe validar que email coincida con el principal
-        // (si el rol es USER). Un ADMIN/STAFF puede consultar cualquier email.
         return ResponseEntity.ok(ticketService.findByUserEmail(email));
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // NUEVOS ENDPOINTS — necesarios para el Escenario 8 y 11.1 del PRD
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * FR-SEC-TKT-01: consultar un ticket por código.
+     * Ownership: USER solo sus tickets, STAFF/ADMIN pueden ver cualquiera.
+     */
+    @GetMapping("/{ticketCode}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TicketResponse> findByCode(@PathVariable String ticketCode) {
+        return ResponseEntity.ok(ticketService.findByCode(ticketCode));
+    }
+
+    /**
+     * FR-SEC-TKT-05: cancelar un ticket.
+     * Ownership: USER solo puede cancelar sus tickets, ADMIN puede cualquiera.
+     */
+    @PatchMapping("/{ticketCode}/cancel")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<TicketResponse> cancel(@PathVariable String ticketCode) {
+        return ResponseEntity.ok(ticketService.cancel(ticketCode));
+    }
+
+    /**
+     * FR-SEC-TKT-06: marcar un ticket como usado (control de acceso).
+     * Solo STAFF o ADMIN. Preserva la transición válida del Service.
+     */
+    @PatchMapping("/{ticketCode}/use")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ResponseEntity<TicketResponse> markAsUsed(@PathVariable String ticketCode) {
+        return ResponseEntity.ok(ticketService.markAsUsed(ticketCode));
+    }
+
+    /**
+     * FR-SEC-TKT-04: consultar tickets pagados de un evento.
+     * Solo STAFF o ADMIN.
+     */
+    @GetMapping("/event/{eventCode}/paid")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    public ResponseEntity<List<TicketResponse>> findPaidTicketsByEvent(@PathVariable String eventCode) {
+        return ResponseEntity.ok(ticketService.findPaidTicketsByEvent(eventCode));
     }
 }

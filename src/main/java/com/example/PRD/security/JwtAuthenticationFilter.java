@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // Si no hay cabecera Authorization o no empieza con Bearer, pasamos al siguiente filtro
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -40,25 +39,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String jwt = authHeader.substring(7);
             final String username = jwtService.extractUsername(jwt);
 
-            // Si tenemos un usuario y aún no está autenticado en el contexto actual
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-                // Validamos el token contra el usuario cargado de la base de datos
-                if (jwtService.isTokenValid(jwt, userDetails)) {
+                // ★ FIX: verificar que el token sea válido Y el usuario esté habilitado.
+                // Si el usuario fue desactivado en BD, isEnabled() == false y NO se autentica.
+                if (jwtService.isTokenValid(jwt, userDetails) && userDetails.isEnabled()) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities()
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    // Establecemos la autenticación en el contexto de seguridad de Spring
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
         } catch (Exception e) {
-            // Si el token es inválido, expirado o manipulado, no autenticamos y dejamos que el flujo continúe
             logger.error("No se pudo establecer la autenticación del usuario en el contexto de seguridad", e);
         }
 
