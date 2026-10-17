@@ -1,6 +1,8 @@
 package com.example.PRD.exception;
 
 import com.example.PRD.dto.response.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,6 +17,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
@@ -56,11 +60,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // NUEVO (etapa 7): errores de ownership / autorización lanzados
-    // desde los Services (por ejemplo AuthorizationService.assertCanAccessUserEmail).
-    // Devuelve 403 Forbidden con el mismo contrato ErrorResponse.
-    // ─────────────────────────────────────────────────────────────────
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         String message = (ex.getMessage() != null && !ex.getMessage().isBlank())
@@ -76,11 +75,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // NUEVO: captura excepciones no previstas para no filtrar stacktrace.
-    // ─────────────────────────────────────────────────────────────────
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedJson(
+            org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                "JSON malformado en el cuerpo de la petición",
+                Map.of()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+        // ⚠️ LOG TEMPORAL PARA DEBUG — quitar cuando se resuelva el 500 del login
+        log.error("Excepción no controlada capturada por GlobalExceptionHandler", ex);
+
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
