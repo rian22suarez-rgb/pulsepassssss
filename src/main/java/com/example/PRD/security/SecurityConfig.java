@@ -59,22 +59,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/venues/**").permitAll()
 
                         // ─────────────────────────────────────────────
-                        // 3) SOLO ADMIN: gestión de eventos
+                        // 3) SOLO ADMIN: gestión de eventos (usando hasAuthority)
                         // ─────────────────────────────────────────────
-                        .requestMatchers(HttpMethod.POST, "/api/events").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/events/*/publish").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/events/*/artists/*").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/events").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/events/*/publish").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/events/*/artists/*").hasAuthority("ADMIN")
 
                         // ─────────────────────────────────────────────
                         // 4) STAFF / ADMIN: operación de tickets
-                        //    (ownership real se valida en Service)
                         // ─────────────────────────────────────────────
-                        .requestMatchers(HttpMethod.GET, "/api/events/*/tickets/paid").hasAnyRole("STAFF", "ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/use").hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/events/*/tickets/paid").hasAnyAuthority("STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/tickets/*/use").hasAnyAuthority("STAFF", "ADMIN")
 
                         // ─────────────────────────────────────────────
                         // 5) AUTENTICADOS: tickets y perfil
-                        //    Ownership se valida en Service/@PreAuthorize
                         // ─────────────────────────────────────────────
                         .requestMatchers("/api/tickets/**").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
@@ -85,7 +83,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
-                // 4) ★ CLAVE: si NO hay token válido → 401 en vez de 403 ★
+                // 4) Si NO hay token válido → 401 en vez de 403
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
@@ -93,7 +91,7 @@ public class SecurityConfig {
                 // 5) Proveedor de autenticación (userDetailsService + BCrypt)
                 .authenticationProvider(authenticationProvider())
 
-                // 6) Filtro JWT antes del filtro de usuario/contraseña estándar
+                // 6) Filtro JWT antes del filtro estándar
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -106,7 +104,6 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        // Constructor con userDetailsService (Spring Security 6.4+/7.x)
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;

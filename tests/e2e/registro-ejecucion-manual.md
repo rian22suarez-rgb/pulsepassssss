@@ -28,3 +28,4 @@
 | TC-FLOW-001 | ANON | GET /api/events/published | 200 | 200 | Flujo A: Descubrimiento público | **PASS** | Eventos públicos obtenidos correctamente. |
 | TC-FLOW-003 | ADMIN | PATCH /api/events/E2E-2026/publish | 200 / 409 | 409 | Flujo C: Publicación de evento por ADMIN | **PASS** | Confirma que el evento ya estaba publicado. |
 | TC-FLOW-004 | USER_A | POST /api/tickets | 201 | 201 | Flujo D: Compra de ticket usuario final | **PASS** | Ticket creado y vinculado a E2E-2026. |
+| TC-SEC-001 | USER_A | POST /api/events | 403 | 403 | Bloquear creación de eventos a rol USER | **PASS** | El servidor denegó correctamente el acceso con 403 Forbidden al usuario estándar. |
