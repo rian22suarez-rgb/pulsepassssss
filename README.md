@@ -1,34 +1,44 @@
 # PulsePass API
 
-Backend REST para venta de tickets de eventos. Construido con Spring Boot 4, Spring Security 7, JWT (JJWT) y PostgreSQL 18. Este documento cubre el estado completo del proyecto, desde la persistencia hasta la seguridad y autorización.
+Backend REST para la plataforma de gestión de eventos, artistas y venta de tickets. Construido con Spring Boot, Spring Security, JWT (JJWT) y PostgreSQL. Este repositorio implementa el ciclo completo de la aplicación, desde la persistencia y servicios hasta la capa de controladores REST, seguridad basada en roles (RBAC) y la suite de pruebas End-to-End (E2E).
 
 ---
 
-## 📋 Stack Tecnológico
+## Stack Tecnológico
 
 - **Java 21**
-- **Spring Boot 4.1.1**, Spring Framework 7.0.9, Spring Security 7.1.1
-- **Hibernate 7.4.5**, Spring Data JPA
-- **PostgreSQL 18** (Docker)
-- **Flyway 12.4.0** (Migraciones V1–V4)
-- **JJWT 0.13.0** (Firma HS256)
-- **MapStruct 1.6.3** (Mapeo DTO ↔ Entidad)
-- **Testcontainers 2.0.5** (Pruebas de integración reales)
+- **Spring Boot**, Spring Security, Spring Framework
+- **Spring Data JPA & Hibernate**
+- **PostgreSQL** (Docker)
+- **Flyway** (Migraciones de base de datos)
+- **JJWT** (Autenticación y tokens JWT con firma HS256)
+- **MapStruct** (Mapeo DTO ↔ Entidad)
 - **Maven Wrapper**
 
 ---
 
-## 🚀 Requisitos Previos
+## Arquitectura y Dominio de la Aplicación
 
-- **JDK 21+** (el proyecto usa JDK 27 en IntelliJ)
-- **Docker Desktop** corriendo
-- **Git**
+PulsePass gestiona 5 entidades de negocio principales que interactúan mediante reglas estrictas de capacidad, estados y roles:
+1. **Venues (Sedes):** Espacios físicos activos donde se realizan los eventos.
+2. **Artists (Artistas):** Creadores o talentos asociables a los eventos del catálogo.
+3. **Events (Eventos):** Obras o presentaciones que pasan por estados de `DRAFT` (borrador) y `PUBLISHED` (público).
+4. **Users (Usuarios):** Cuentas de usuario con roles diferenciados (`USER`, `STAFF`, `ADMIN`).
+5. **Tickets (Entradas):** Títulos de acceso adquiridos por los usuarios, con ciclo de vida gestionado (`PAID`, `CANCELLED`, `USED`).
 
 ---
 
-## 🗄️ Base de Datos
+## Requisitos Previos
 
-El proyecto usa PostgreSQL 18 en un contenedor Docker. Para levantarlo:
+- **JDK 21+**
+- **Docker Desktop** (para levantar la base de datos PostgreSQL)
+- **Postman** (para la ejecución de la suite de pruebas E2E manuales)
+
+---
+
+## Base de Datos y Ejecución
+
+El proyecto utiliza PostgreSQL en un contenedor Docker. Para levantar el entorno local:
 
 ```bash
 docker compose up -d
